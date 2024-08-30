@@ -1,0 +1,32 @@
+.outer-rooms {
+    height: 500px;
+    width: 300px;
+    border: 2px solid #00796b;
+    border-radius: 15px;
+    background-color: #7db0aa;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    padding: 10px;
+    margin-bottom: 5px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    scrollbar-width: none;
+     
+}
+
+.card{
+    cursor: pointer;
+    height: 80px;
+    width: 280px;
+    margin: auto;
+    margin-bottom: 10px;
+    background-color:#bbc9c7;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    border-radius: 15px;
+    position: relative;
+    padding: 10px;
+
+}
+
+/* <h1  style={{fontSize:"30px",color: "#004d40",marginLeft:"15px"}}>Chat Rooms</h1> */
