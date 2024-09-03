@@ -35,9 +35,16 @@ const UserLogin = () => {
   });
   if(isFormValid){
     try{
-      const res = await dispatch(UserLoginThunk(formData))
-      console.log(res,'lllk')
-      toast.success("Successfully logged in")
+      const res =  await dispatch(UserLoginThunk(formData))
+      console.log(res,'dd')
+      const {access,refresh} = res.payload
+      if (access){
+
+        console.log(access,refresh,'lllk')
+        localStorage.setItem('access',access)
+        localStorage.setItem('refresh',refresh)
+        toast.success("Successfully logged in")
+      }
     }catch(error){
       toast.error("Failed to login")
     }

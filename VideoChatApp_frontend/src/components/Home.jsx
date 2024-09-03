@@ -16,6 +16,8 @@ const Home = () => {
     try{
       
       dispatch(userLogout())
+      localStorage.removeItem("access")
+      localStorage.removeItem("refresh")
       navigate('/login')
     }catch(error){
       console.log('failed to logout')

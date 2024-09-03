@@ -3,8 +3,8 @@ import { UserLoginResponse } from "../../axios/Userserver";
 import { initialstate } from "../store/RootStore";
 
 export const UserLoginThunk = createAsyncThunk('user/login',async ({email, password})=>{
-    console.log(email,"emails")
     const authdata = await UserLoginResponse(email,password)
+    console.log(authdata,'kk')
     return authdata
 })
 

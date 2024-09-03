@@ -7,76 +7,61 @@ const VideoChatRoom = ({ roomId, webSocket }) => {
   const [remotePeerId, setRemotePeerId] = useState(null);
   const remoteVideoRef = useRef(null);
   const currentUserVideoRef = useRef(null);
-  const peerInstance = useRef(null);
+  const peerRef = useRef(null); // Ref to store the Peer instance
 
   useEffect(() => {
-    const peer = new Peer();
+    // Create the Peer instance only if it doesn't exist
+    if (!peerRef.current) {
+      const peer = new Peer();
 
-    peer.on('open', (id) => {
-      setPeerId(id);
-      console.log(`Joined room: ${roomId} with Peer ID: ${id}`);
-      
-      // Notify the server with the peer ID
-      webSocket.send(JSON.stringify({ type: 'peer-id', roomId, peerId: id }));
-    });
+      peer.on('open', (id) => {
+        setPeerId(id);
+        console.log(`Joined room: ${roomId} with Peer ID: ${id}`);
 
-    peer.on('call', (call) => {
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then((mediaStream) => {
-          currentUserVideoRef.current.srcObject = mediaStream;
-          currentUserVideoRef.current.play();
-          call.answer(mediaStream);
-          call.on('stream', (remoteStream) => {
-            remoteVideoRef.current.srcObject = remoteStream;
-            remoteVideoRef.current.play();
+        // Notify the server with the peer ID
+        webSocket.send(JSON.stringify({ type: 'peer-id', roomId, peerId: id }));
+      });
+
+      peer.on('call', (call) => {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+          .then((mediaStream) => {
+            currentUserVideoRef.current.srcObject = mediaStream;
+            currentUserVideoRef.current.play();
+            call.answer(mediaStream);
+            call.on('stream', (remoteStream) => {
+              remoteVideoRef.current.srcObject = remoteStream;
+              remoteVideoRef.current.play();
+            });
+          })
+          .catch((err) => {
+            console.error('Error accessing media devices:', err);
           });
-        })
-        .catch((err) => {
-          console.error('Error accessing media devices:', err);
-        });
-    });
+      });
 
-    peerInstance.current = peer;
+      peerRef.current = peer; // Store the Peer instance in the ref
+    }
 
     // Handle incoming WebSocket messages
-    webSocket.onmessage = (event) => {
-      console.log('ddd')
-      try {
-        const data = JSON.parse(event.data);
-        console.log('Received WebSocket message:', data);
-
-        if (data.type === 'peer-id' && data.roomId === roomId && data.peerId !== peerId) {
-          setRemotePeerId(data.peerId);
-        }
-      } catch (error) {
-        console.error('Error handling WebSocket message:', error);
-      }
-    };
-    
     const handleWebSocketMessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        console.log('Received WebSocket message:', data);
-    
-        if (data.type === 'peer-id' && data.roomId === roomId && data.peerId !== peerId) {
-          console.log('Updating remotePeerId:', data.peerId);
-          setRemotePeerId(data.peerId);
-        }
-      } catch (error) {
-        console.error('Error handling WebSocket message:', error);
-      }
-    };
-    
-    webSocket.onmessage = handleWebSocketMessage;
-    
+      const data = JSON.parse(event.data);
+      console.log('Received WebSocket message:', data);
 
-    // Clean up on component unmount
-    return () => {
-      if (peerInstance.current) {
-        peerInstance.current.destroy();
+      if (data.type === 'peer-id' && data.roomId === roomId && data.peerId !== peerId) {
+        setRemotePeerId(data.peerId);
       }
     };
-  }, [roomId, webSocket]);
+
+    webSocket.addEventListener('message', handleWebSocketMessage);
+
+    return () => {
+      // Clean up on component unmount
+      if (peerRef.current) {
+        peerRef.current.destroy();
+        peerRef.current = null;
+      }
+      webSocket.removeEventListener('message', handleWebSocketMessage);
+    };
+  }, [roomId, webSocket, peerId]);
 
   const callPeer = () => {
     if (remotePeerId) {
@@ -85,7 +70,7 @@ const VideoChatRoom = ({ roomId, webSocket }) => {
           currentUserVideoRef.current.srcObject = mediaStream;
           currentUserVideoRef.current.play();
 
-          const call = peerInstance.current.call(remotePeerId, mediaStream);
+          const call = peerRef.current.call(remotePeerId, mediaStream);
 
           call.on('stream', (remoteStream) => {
             remoteVideoRef.current.srcObject = remoteStream;
@@ -99,10 +84,6 @@ const VideoChatRoom = ({ roomId, webSocket }) => {
       console.log('No remote peer ID available to call.');
     }
   };
-
-  useEffect(() => {
-    console.log('remotePeerId:', remotePeerId);
-  }, [remotePeerId]);
 
   return (
     <div className="v-app">

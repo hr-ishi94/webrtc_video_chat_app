@@ -33,6 +33,10 @@ const UserRegistration = () => {
       return true; // Skip non-string values in the validation
   });
   if(isFormValid){
+    if (formData.password!= formData.confirm_password){
+      toast.warning("Passwords didn't match! ")
+      return 
+    }
 
     try{
       
