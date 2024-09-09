@@ -8,18 +8,22 @@ import Home from './components/Home'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import WebRTCComponent from './components/WebRTCComponent'
+import PrivateRoute from './axios/PrivateRoute'
+import { AuthProvider } from './context/AuthContext'
 
 function App() {
   
   return (
     <>
-    <Routes>
-      <Route path='/login' element={<UserLogin/>}/>
-      <Route path='/register' element={<UserRegistration/>}/>
-      <Route path='/home' element={<Home/>}/>
-      <Route path='/webrtc' element={<WebRTCComponent/>}/>
-      <Route path='/call' element={<VideoChatRoom/>}/>
-    </Routes> 
+    <AuthProvider>
+      <Routes>
+        <Route path='/login' element={<UserLogin/>}/>
+        <Route path='/register' element={<UserRegistration/>}/>
+        <Route element={<PrivateRoute element={<Home/>}/>} path='/' exact/>
+      <Route path='/webrtc' element={<PrivateRoute element={<WebRTCComponent/>}/>}/>
+      <Route path='/call' element={<PrivateRoute element={<VideoChatRoom/>}/>}/>
+      </Routes> 
+    </AuthProvider>
     <ToastContainer position='bottom-left'/>
       
     </>

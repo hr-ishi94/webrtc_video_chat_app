@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useContext } from 'react'
 import './Home.css'
 import Rooms from './Rooms'
 import { Button } from 'react-bootstrap'
@@ -6,11 +6,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import { userLogout } from '../redux/slices/UserAuthSlice'
 import { Navigate, useNavigate } from 'react-router-dom'
 import VideoChatRoom from './VideoChatRoom'
+import AuthContext from '../context/AuthContext'
 
 const Home = () => {
-  const {access,is_authenticated} = useSelector((state)=>state.UserToken)
   const dispatch = useDispatch()
-  
+  const {logoutUser} = useContext(AuthContext)
   const navigate = useNavigate()
   const handleLogout =useCallback(()=>{
     try{
@@ -25,15 +25,12 @@ const Home = () => {
 
   },[])
   return (
-    <>
-    {!is_authenticated? 
-      <Navigate to={'/login'}/>:
-      <div className='outer-home'>
-        <Rooms />
-        <Button className='logout ' variant='' onClick={handleLogout}><i className="fa-solid fa-arrow-right-from-bracket"></i></Button>
-
-    </div>}
-        </>
+    
+    <div className='outer-home'>
+      <Rooms />
+      <Button className='logout ' variant='' onClick={logoutUser}><i className="fa-solid fa-arrow-right-from-bracket"></i></Button>
+    </div>
+    
   )
 }
 
